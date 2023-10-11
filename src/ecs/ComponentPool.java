@@ -1,4 +1,4 @@
-package ecs;
+package src.ecs;
 
 class ComponentPool{
     private Object[] components;

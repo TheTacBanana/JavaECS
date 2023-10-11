@@ -10,4 +10,8 @@ abstract public class IComponent {
     public void linkEntity(Entity e){
         this.entity = e;
     }
+
+    public boolean isLinked(){
+        return entity == null;
+    }
 }

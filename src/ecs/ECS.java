@@ -1,4 +1,4 @@
-package ecs;
+package src.ecs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,14 +51,18 @@ public class ECS {
     }
 
     public Entity getEntity(int id){
-        
+        if (id >= 0 && id < this.entityArray.length){
+            return this.entityArray[id];
+        } else {
+            return null;
+        }
     }
 
     public void removeEntity(int id){
         // TODO: delete
     }
 
-    public Boolean entityExists(int id){
+    public boolean entityExists(int id){
         return id >= 0 && id < this.entityArray.length && this.entityArray[id] != null;
     }
 
@@ -88,7 +92,7 @@ public class ECS {
         }        
     }
 
-    public <T> Boolean hasComponent(int entityId, Class<T> compClass){
+    public <T> boolean hasComponent(int entityId, Class<T> compClass){
         if (this.entityExists(entityId)){
             int compId = this.getComponentId(compClass);
             ComponentPool pool = this.getComponentPool(compId);
@@ -102,10 +106,20 @@ public class ECS {
         if (this.entityExists(entityId)){
             int compId = this.getComponentId(compClass);
             ComponentPool pool = this.getComponentPool(compId);
-            T comp = (T) pool.get(entityId);
-            comp.linkEntity(this.);
+            return (T) pool.get(entityId);
+        } else{
+            return null;
+            // TODO: Except
+        }
+    }
 
-            return ;
+    public <T extends IComponent> T addComponent(int entityId, T comp){
+        if (this.entityExists(entityId)){
+            int compId = this.getComponentId(comp.getClass());
+            ComponentPool pool = this.getComponentPool(compId);
+            T newComp = (T) pool.insert(entityId, comp);
+            comp.linkEntity(this.getEntity(entityId));
+            return comp;
         } else{
             return null;
             // TODO: Except
@@ -120,4 +134,6 @@ public class ECS {
         } 
         // TODO: Except
     }
+
+    // public <T> T query()
 }
