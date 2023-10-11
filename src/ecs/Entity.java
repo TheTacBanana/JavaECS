@@ -1,12 +1,16 @@
 package src.ecs;
 
+import java.util.BitSet;
+
 public class Entity {
     private int id;
     private ECS ecs;
+    private BitSet bitset;
 
     public Entity(int id, ECS ecs) {
         this.id = id;
         this.ecs = ecs;
+        this.bitset = new BitSet(ECS.MAX_COMPONENT_POOLS);
     }
 
     // public Entity setTag(String string){
@@ -16,6 +20,10 @@ public class Entity {
 
     public int getId(){
         return this.id;
+    }
+
+    public BitSet getBitSet(){
+        return this.bitset;
     }
 
     public <T extends IComponent> T getComponent(Class<T> c){

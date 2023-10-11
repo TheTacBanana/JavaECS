@@ -1,4 +1,4 @@
-package ecs;
+package src.ecs;
 
 abstract public class IComponent {
     private Entity entity;

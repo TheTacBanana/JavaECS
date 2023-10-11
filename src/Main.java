@@ -8,14 +8,11 @@ public class Main {
         Entity e1 = ecs.createEntity(new Position());
         Entity e2 = ecs.createEntity(new Position(), new Sprite());
 
-        Sprite s1 = e1.getComponent(Sprite.class);
-        System.out.println(s1);
+        System.out.println(ecs.query(Position.class));
+        System.out.println(ecs.query(Position.class, Sprite.class));
 
         e1.addComponent(new Sprite());
-
-        Sprite s2 = e1.getComponent(Sprite.class);
-        System.out.println(s2);
-
+        System.out.println(ecs.query(Position.class, Sprite.class));
     }
 }
 
