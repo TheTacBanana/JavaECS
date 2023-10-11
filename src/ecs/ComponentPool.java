@@ -4,7 +4,7 @@ class ComponentPool{
     private Object[] components;
 
     ComponentPool(){
-        this.components = new Object[ECS.MAX_ENTITY_ID];
+        this.components = new Object[ECSInternal.MAX_ENTITY_ID];
     }
 
     public Object get(int id){
