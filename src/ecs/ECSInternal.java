@@ -34,7 +34,7 @@ public class ECSInternal {
     }
 
     public Entity createEntity(Object... comps) {
-        int entityId = this.freeEntityIds.removeLast();
+        int entityId = this.freeEntityIds.remove(this.freeEntityIds.size() - 1);
         this.entityArray[entityId] = new Entity(entityId, this);
         Entity entity = this.entityArray[entityId];
 

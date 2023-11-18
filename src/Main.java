@@ -1,24 +1,32 @@
 package src;
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+import java.util.ArrayList;
+
 import src.ecs.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         ECSInternal ecs = new ECSInternal();
 
         Entity e1 = ecs.createEntity(new Position());
         Entity e2 = ecs.createEntity(new Position(), new Sprite());
 
-        System.out.println(e1.getComponent(Position.class));
-        System.out.println(e1.getComponent(Sprite.class));
+        for (Method m : methods) {
+            Class<?>[] inputs = m.getParameterTypes();
+            Object[] objects = new Object[inputs.length];
+            
+            for (int i = 0; i < inputs.length; i++) {
+                Class<?> c = inputs[i];
+                if (c == Position.class){
+                    objects[i] = new Position();
+                } else if (c == Sprite.class){
+                    objects[i] = new Sprite();
+                }
+            }
 
-        System.out.println(e2.getComponent(Position.class));
-        System.out.println(e2.getComponent(Sprite.class));
-
-        // System.out.println(ecs.query(Position.class));
-        // System.out.println(ecs.query(Position.class, Sprite.class));
-
-        // e1.addComponent(new Sprite());
-        // ecs.query(Position.class, Sprite.class);
+            m.invoke(null, objects);
+        }
     }
 }
 
