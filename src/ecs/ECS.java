@@ -1,8 +1,13 @@
 package src.ecs;
 
-public class ECS {
+import java.util.ArrayList;
 
+public class ECS {
     private ECSInternal internal;
+
+    public ECS(ECSInternal internal){
+        this.internal = internal;
+    }
 
     public Entity createEntity() throws Exception{
         return internal.createEntity();
@@ -24,4 +29,7 @@ public class ECS {
         return internal.entityExists(0);
     }
 
+    public ArrayList<Entity> query(Class<?>[] with, Class<?>[] without){
+        return this.internal.query(with, without);
+    }
 }

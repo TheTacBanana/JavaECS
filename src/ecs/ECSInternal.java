@@ -11,6 +11,7 @@ public class ECSInternal {
 
     // Entitys
     Entity[] entityArray;
+    BitSet[] bitsetArray;
     ArrayList<Integer> freeEntityIds;
 
     // Components
@@ -20,6 +21,7 @@ public class ECSInternal {
 
     public ECSInternal() {
         this.entityArray = new Entity[ECSInternal.MAX_ENTITY_ID];
+        this.bitsetArray = new BitSet[ECSInternal.MAX_ENTITY_ID];
         this.freeEntityIds = new ArrayList<>();
         for (int i = MAX_ENTITY_ID; i >= 0; i--) {
             this.freeEntityIds.add(i);
@@ -36,6 +38,7 @@ public class ECSInternal {
     public Entity createEntity(Object... comps) {
         int entityId = this.freeEntityIds.remove(this.freeEntityIds.size() - 1);
         this.entityArray[entityId] = new Entity(entityId, this);
+        this.bitsetArray[entityId] = new BitSet(ECSInternal.MAX_COMPONENT_POOLS);
         Entity entity = this.entityArray[entityId];
 
         int[] ids = this.registerComponents(comps);
@@ -44,8 +47,8 @@ public class ECSInternal {
             ComponentPool pool = this.getComponentPool(compId);
             IComponent newComp = (IComponent) pool.insert(entityId, comps[i]);
             newComp.linkEntity(this.getEntity(entityId));
+            this.getEntityBitSet(entityId).set(compId);
         }
-        // this.updateEntityBitset(entity.getId());
         return entity;
     }
 
@@ -73,20 +76,9 @@ public class ECSInternal {
         return id >= 0 && id < this.entityArray.length && this.entityArray[id] != null;
     }
 
-    // private void updateEntityBitset(int id){
-    // if (this.entityExists(id)){
-    // BitSet bitset = this.getEntity(id).getBitSet();
-
-    // for (int i = 0; i < componentPools.length; i++) {
-    // ComponentPool pool = this.componentPools[i];
-    // if (pool != null && pool.exists(id)){
-    // bitset.set(i);
-    // } else {
-    // bitset.clear(i);
-    // }
-    // }
-    // }
-    // }
+    public BitSet getEntityBitSet(int id) {
+        return this.bitsetArray[id];
+    }
 
     private int[] registerComponents(Object... objects) {
         int length = objects == null ? 0 : objects.length;
@@ -121,9 +113,8 @@ public class ECSInternal {
                 ComponentPool pool = this.getComponentPool(ids[i]);
                 IComponent newComp = (IComponent) pool.insert(entityId, objects[i]);
                 newComp.linkEntity(this.getEntity(entityId));
+                this.getEntityBitSet(entityId).set(ids[i]);
             }
-
-            // this.updateEntityBitset(entityId);
         }
     }
 
@@ -141,21 +132,19 @@ public class ECSInternal {
     public <T> boolean hasComponent(int entityId, Class<T> compClass) {
         if (this.entityExists(entityId)) {
             int compId = this.registerComponents(compClass)[0];
-            ComponentPool pool = this.getComponentPool(compId);
-            return pool.exists(entityId);
+            return this.getEntityBitSet(entityId).get(compId);
         } else {
             return false;
         }
     }
 
-    public <T extends IComponent> T getComponent(int entityId, Class<T> compClass) {
+    public <T> T getComponent(int entityId, Class<T> compClass) {
         if (this.entityExists(entityId)) {
             int compId = this.registerComponents(compClass)[0];
             ComponentPool pool = this.getComponentPool(compId);
             return (T) pool.get(entityId);
         } else {
             return null;
-            // TODO: Except
         }
     }
 
@@ -164,31 +153,40 @@ public class ECSInternal {
             int compId = this.registerComponents(compClass)[0];
             ComponentPool pool = this.getComponentPool(compId);
             pool.remove(entityId);
-
-            // this.updateEntityBitset(entityId);
+            this.getEntityBitSet(entityId).clear(compId);
         }
-        // TODO: Except
     }
 
-    // public ArrayList<Integer> query(Class<?> ...comps){
-    // int[] compIds = this.getComponentIds(comps);
-    // BitSet target = this.idsToBitSet(compIds);
+    private BitSet componentsToBitSet(Class<?>... comps){
+        int[] compIds = this.registerComponents(comps);
+        BitSet bs = new BitSet(ECSInternal.MAX_COMPONENT_POOLS);
+        for (int i : compIds) {
+            bs.set(i);
+        }
+        return bs;
+    }
 
-    // ArrayList<Integer> entities = new ArrayList<>();
+    public ArrayList<Entity> query(Class<?>[] withIn, Class<?>[] withoutIn) {
+        BitSet with = this.componentsToBitSet(withIn);
+        BitSet without = this.componentsToBitSet(withoutIn);
 
-    // for (Entity entity : this.entityArray) {
-    // if (entity == null){
-    // continue;
-    // }
+        ArrayList<Entity> entities = new ArrayList<>();
 
-    // BitSet intersection = (BitSet) entity.getBitSet().clone();
-    // intersection.and(target);
+        for (int i = 0; i < this.entityArray.length; i++) {
+            Entity entity = this.getEntity(i);
+            if (entity == null) {
+                continue;
+            }
 
-    // if (intersection.equals(target)){
-    // entities.add(entity.getId());
-    // }
-    // }
+            BitSet withRes = (BitSet) this.getEntityBitSet(i).clone();
+            BitSet withoutRes = (BitSet) this.getEntityBitSet(i).clone();
+            withRes.and(with);
+            withoutRes.and(without);
 
-    // return entities;
-    // }
+            if (withRes.equals(with) && withoutRes.isEmpty()) {
+                entities.add(entity);
+            }
+        }
+        return entities;
+    }
 }
