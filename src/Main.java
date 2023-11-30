@@ -1,38 +1,127 @@
 package src;
 
+import java.util.Random;
+
 import src.ecs.*;
 import src.world.World;
 import src.world.annotations.ComponentSystem;
-import src.world.annotations.Without;
+import src.world.annotations.Resource;
+
+/*
+Performance for 100000:
+V1 No Threading 0.06 Delta Time
+*/
 
 public class Main {
     public static void main(String[] args) throws Exception {
         World world = new World();
 
-        Entity e1 = world.ecs().createEntity(new Position());
-        Entity e2 = world.ecs().createEntity(new Position(), new Sprite());
+        world.addResource(new Time());
 
-        world.addSystem(Position.class);
+        world.addSystemsFrom(Main.class);
 
-        world.runSystems();
+        for (int i = 0; i < World.MAX_ENTITY_ID; i++) {
+            world.ecs().createEntity(
+                    Position.random(),
+                    new Velocity(),
+                    new Acceleration(),
+                    new Mass(10.),
+                    new Gravity());
+        }
+
+        while (true) {
+            Main.updateDeltaTime(world.getResource(Time.class));
+            world.runSystems();
+            System.out.println(1. / ((Time)world.getResource(Time.class)).deltaTime);
+        }
+    }
+
+    // @ComponentSystem
+    public static void updateDeltaTime(@Resource Time time) {
+        long current = System.nanoTime();
+        time.deltaTime = ((current - time.lastTime) / 1000000.);
+        time.lastTime = current;
+    }
+
+    @ComponentSystem
+    public static void applyGravity(Gravity grav, Acceleration acc) {
+        acc.dy = grav.gravity;
+    }
+
+    @ComponentSystem
+    public static void applyAcceleration(Position pos, Velocity vel, Acceleration acc, Mass mass, @Resource Time time) {
+        vel.dx = (acc.dx / mass.mass) * time.deltaTime;
+        vel.dy = (acc.dy / mass.mass) * time.deltaTime;
+
+        pos.x += vel.dx * time.deltaTime;
+        pos.y += vel.dy * time.deltaTime;
+
+        acc.dx = 0;
+        acc.dy = 0;
+    }
+}
+
+class Time extends IComponent {
+    long lastTime;
+    double deltaTime;
+
+    public Time() {
+        this.lastTime = System.nanoTime();
     }
 }
 
 class Position extends IComponent {
-    int x;
-    int y;
+    double x;
+    double y;
 
-    @ComponentSystem
-    public static void update(Position position){
-        System.out.println("This has run");
+    public Position() {
     }
 
-    @ComponentSystem
-    public static void update(Position position, @Without Sprite _s){
-        System.out.println("This has run withjout sprite");
+    public Position(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public static Position random() {
+        Random r = new Random();
+        return new Position(r.nextDouble() * 100 - 50, r.nextDouble() * 100 - 50);
     }
 }
 
-class Sprite extends IComponent {
-    String s;
+class Velocity extends IComponent {
+    double dx;
+    double dy;
+
+    public Velocity() {
+    }
+
+    public Velocity(double dx, double dy) {
+        this.dx = dx;
+        this.dy = dy;
+    }
+}
+
+class Acceleration extends IComponent {
+    double dx;
+    double dy;
+
+    public Acceleration() {
+    }
+
+    public Acceleration(double dx, double dy) {
+        this.dx = dx;
+        this.dy = dy;
+    }
+}
+
+class Mass extends IComponent {
+    double mass;
+
+    public Mass(double mass) {
+        this.mass = mass;
+    }
+}
+
+class Gravity extends IComponent {
+    double gravity = -9.81;
 }

@@ -17,7 +17,11 @@ public class Entity {
         return ecs.getComponent(this.id, c);
     }
 
-    public <T extends Object, IComponent> void addComponent(T ...comps){
+    public <T extends IComponent> void addComponent(T comps){
+        ecs.addComponents(this.id, comps);
+    }
+
+    public <T extends IComponent> void addComponents(T ...comps){
         ecs.addComponents(this.id, comps);
     }
 

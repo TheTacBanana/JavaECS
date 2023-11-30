@@ -5,9 +5,8 @@ import java.util.BitSet;
 import java.util.HashMap;
 
 public class ECSInternal {
-    // Static Consts
-    public final static int MAX_ENTITY_ID = 256;
-    public final static int MAX_COMPONENT_POOLS = 32;
+    final int MAX_ENTITY_ID;
+    final int MAX_COMPONENT_POOLS;
 
     // Entitys
     Entity[] entityArray;
@@ -19,16 +18,20 @@ public class ECSInternal {
     HashMap<Class<?>, Integer> componentMap;
     ComponentPool[] componentPools;
 
-    public ECSInternal() {
-        this.entityArray = new Entity[ECSInternal.MAX_ENTITY_ID];
-        this.bitsetArray = new BitSet[ECSInternal.MAX_ENTITY_ID];
+    public ECSInternal(int maxEntities, int maxComponents) {
+        this.MAX_ENTITY_ID = maxEntities;
+        this.MAX_COMPONENT_POOLS = maxComponents;
+
+        this.entityArray = new Entity[maxEntities];
+        this.bitsetArray = new BitSet[maxEntities];
         this.freeEntityIds = new ArrayList<>();
         for (int i = MAX_ENTITY_ID; i >= 0; i--) {
             this.freeEntityIds.add(i);
         }
 
         this.componentMap = new HashMap<>();
-        this.componentPools = new ComponentPool[ECSInternal.MAX_COMPONENT_POOLS];
+        this.componentPools = new ComponentPool[maxComponents];
+
     }
 
     public Entity createEntity() {
@@ -38,7 +41,7 @@ public class ECSInternal {
     public Entity createEntity(Object... comps) {
         int entityId = this.freeEntityIds.remove(this.freeEntityIds.size() - 1);
         this.entityArray[entityId] = new Entity(entityId, this);
-        this.bitsetArray[entityId] = new BitSet(ECSInternal.MAX_COMPONENT_POOLS);
+        this.bitsetArray[entityId] = new BitSet(this.MAX_COMPONENT_POOLS);
         Entity entity = this.entityArray[entityId];
 
         int[] ids = this.registerComponents(comps);
@@ -121,7 +124,7 @@ public class ECSInternal {
     private ComponentPool getComponentPool(int compId) {
         if (compId >= 0 && compId < this.componentPools.length) {
             if (this.componentPools[compId] == null) {
-                this.componentPools[compId] = new ComponentPool();
+                this.componentPools[compId] = new ComponentPool(this.MAX_ENTITY_ID);
             }
             return this.componentPools[compId];
         } else {
@@ -138,7 +141,7 @@ public class ECSInternal {
         }
     }
 
-    public <T> T getComponent(int entityId, Class<T> compClass) {
+    public <T> T getComponent(int entityId, Class<?> compClass) {
         if (this.entityExists(entityId)) {
             int compId = this.registerComponents(compClass)[0];
             ComponentPool pool = this.getComponentPool(compId);
@@ -159,7 +162,7 @@ public class ECSInternal {
 
     private BitSet componentsToBitSet(Class<?>... comps){
         int[] compIds = this.registerComponents(comps);
-        BitSet bs = new BitSet(ECSInternal.MAX_COMPONENT_POOLS);
+        BitSet bs = new BitSet(this.MAX_COMPONENT_POOLS);
         for (int i : compIds) {
             bs.set(i);
         }

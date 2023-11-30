@@ -3,8 +3,8 @@ package src.ecs;
 class ComponentPool{
     private Object[] components;
 
-    ComponentPool(){
-        this.components = new Object[ECSInternal.MAX_ENTITY_ID];
+    ComponentPool(int maxEntities){
+        this.components = new Object[maxEntities];
     }
 
     public Object get(int id){
