@@ -5,19 +5,15 @@ import java.util.stream.Stream;
 
 import src.ecs.*;
 import src.world.World;
-import src.world.annotations.ECSSystem;
-import src.world.annotations.Resource;
-import src.world.annotations.With;
+import src.world.annotations.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         World world = new World();
-
-        world.addResource(new Time());
-
         world.addSystemsFrom(Main.class);
 
-        for (int i = 0; i < World.MAX_ENTITY_ID; i++) {
+        world.addResource(new Time());
+        for (int i = 0; i < 3; i++) {
             world.ecs().createEntity(
                     Position.random(),
                     new Velocity(),
@@ -53,9 +49,10 @@ public class Main {
         @With(Position.class)
         @With(Velocity.class)
         @With(Acceleration.class)
-        @With(Mass.class) Stream<Entity> query,
-        @Resource Time time) {
-
+        @With(Mass.class)
+        Stream<Entity> query,
+        @Resource Time time)
+    {
         query.forEach(e -> {
             Position pos = e.getComponent(Position.class);
             Velocity vel = e.getComponent(Velocity.class);

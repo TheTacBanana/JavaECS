@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import src.world.annotations.Resource;
 import src.world.annotations.With;
 import src.world.annotations.WithMany;
+import src.world.annotations.Without;
+import src.world.annotations.WithoutMany;
 
 public class SystemRunner {
     private Method method;
@@ -52,6 +54,24 @@ public class SystemRunner {
                 for (With with : withMany) {
                     query.addWith(with.value());
                 }
+
+
+            } else if (c == Without.class) {
+                if (query == null) {
+                    query = new RetrieveEntities();
+                }
+                query.addWithout(((Without) annotation).value());
+            } else if (c == WithoutMany.class){
+                if (query == null) {
+                    query = new RetrieveEntities();
+                }
+                Without[] withoutMany = ((WithoutMany) annotation).value();
+
+                for (Without without : withoutMany) {
+                    query.addWithout(without.value());
+                }
+
+
             } else if (c == Resource.class) {
                 if (resource == null) {
                     resource = new RetrieveResource(paramType);
@@ -79,7 +99,6 @@ public class SystemRunner {
                 this.methodInputs[i] = p.getFromWorld(world);
             }
         }
-
         try {
             this.method.invoke(null, this.methodInputs);
         } catch (IllegalAccessException | InvocationTargetException e) {
