@@ -1,10 +1,10 @@
-package src.main.java.com.banana.ecslib.world;
+package com.banana.ecslib.world;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import src.main.java.com.banana.ecslib.world.annotations.*;
+import com.banana.ecslib.world.annotations.*;
 
 public class SystemRunner {
     private Method method;

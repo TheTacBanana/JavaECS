@@ -1,4 +1,4 @@
-package src.main.java.com.banana.ecslib.world;
+package com.banana.ecslib.world;
 
 public interface SystemParam {
     public Object getFromWorld(World world);

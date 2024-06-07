@@ -1,3 +1,3 @@
-package src.main.java.com.banana.ecslib.world.annotations;
+package com.banana.ecslib.world.annotations;
 
 public @interface Local {}

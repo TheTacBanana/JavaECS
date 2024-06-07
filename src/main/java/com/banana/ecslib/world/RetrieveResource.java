@@ -1,4 +1,4 @@
-package src.main.java.com.banana.ecslib.world;
+package com.banana.ecslib.world;
 
 public class RetrieveResource implements SystemParam {
     private Class<?> resource;

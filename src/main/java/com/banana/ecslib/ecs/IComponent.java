@@ -1,4 +1,4 @@
-package src.main.java.com.banana.ecslib.ecs;
+package com.banana.ecslib.ecs;
 
 abstract public class IComponent {
     private Entity entity;

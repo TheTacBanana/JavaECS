@@ -1,4 +1,4 @@
-package src.main.java.com.banana.ecslib.world.annotations;
+package com.banana.ecslib.world.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

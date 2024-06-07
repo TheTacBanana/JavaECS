@@ -1,10 +1,10 @@
 import java.util.Random;
 import java.util.stream.Stream;
 
-import src.main.java.com.banana.ecslib.ecs.Entity;
-import src.main.java.com.banana.ecslib.ecs.IComponent;
-import src.main.java.com.banana.ecslib.world.World;
-import src.main.java.com.banana.ecslib.world.annotations.*;
+import com.banana.ecslib.ecs.Entity;
+import com.banana.ecslib.ecs.IComponent;
+import com.banana.ecslib.world.World;
+import com.banana.ecslib.world.annotations.*;
 
 public class Example {
     public static void main(String[] args) throws Exception {
