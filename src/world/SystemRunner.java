@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import src.world.annotations.Local;
 import src.world.annotations.Resource;
 import src.world.annotations.With;
 import src.world.annotations.WithMany;
@@ -76,6 +77,10 @@ public class SystemRunner {
                 if (resource == null) {
                     resource = new RetrieveResource(paramType);
                 }
+            }
+
+            else if (c == Local.class) {
+                return null;
             }
         }
 

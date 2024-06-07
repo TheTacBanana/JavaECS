@@ -28,11 +28,15 @@ public class Main {
     }
 
     @ECSSystem
-    public static void updateDeltaTime(@Resource Time time) {
+    public static void updateDeltaTime(@Resource Time time, @Local Integer counter) {
+        if (counter == null) {
+            counter = 0;
+        }
+        counter += 1;
+
         long current = System.nanoTime();
         time.deltaTime = ((current - time.lastTime) / 1000000.);
         time.lastTime = current;
-        System.out.println(time.deltaTime);
     }
 
     @ECSSystem
