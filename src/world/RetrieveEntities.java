@@ -1,7 +1,5 @@
 package src.world;
 
-import java.util.ArrayList;
-
 public class RetrieveEntities implements SystemParam {
     Class<?>[] with = new Class[0];
     Class<?>[] without = new Class[0];

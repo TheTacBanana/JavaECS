@@ -25,10 +25,6 @@ public class SystemRunner {
         for (int i = 0; i < params.length; i++) {
             this.params[i] = this.buildSystemParam(params[i], annos[i]);
         }
-
-        for (SystemParam p : this.params) {
-            System.out.println(p);
-        }
     }
 
     public SystemParam buildSystemParam(Class<?> paramType, Annotation[] annotations) throws InvalidSystemException {
@@ -82,7 +78,6 @@ public class SystemRunner {
             if (p != null) {
                 this.methodInputs[i] = p.getFromWorld(world);
             }
-            System.out.println(this.methodInputs[i]);
         }
 
         try {

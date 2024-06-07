@@ -5,7 +5,6 @@ public class RetrieveResource implements SystemParam {
 
     public RetrieveResource(Class<?> c) {
         this.resource = c;
-        System.out.println("h" + this.resource);
     }
 
     @Override

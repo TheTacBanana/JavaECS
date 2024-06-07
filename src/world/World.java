@@ -8,7 +8,7 @@ import src.ecs.*;
 import src.world.annotations.ECSSystem;
 
 public class World {
-    public final static int MAX_ENTITY_ID = 100000;
+    public final static int MAX_ENTITY_ID = 1000;
     public final static int MAX_COMPONENT_POOLS = 32;
 
     // ECS

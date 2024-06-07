@@ -17,7 +17,7 @@ public class Main {
 
         world.addSystemsFrom(Main.class);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < World.MAX_ENTITY_ID; i++) {
             world.ecs().createEntity(
                     Position.random(),
                     new Velocity(),
@@ -26,56 +26,52 @@ public class Main {
                     new Gravity());
         }
 
-
-        System.out.println(world.getResource(Time.class));
-        world.runSystems();
-
-        // while (true) {
-            // System.out.println(1. / ((Time) world.getResource(Time.class)).deltaTime);
-        // }
+        while (true) {
+            world.runSystems();
+        }
     }
 
     @ECSSystem
-    public static void system(
-            @With(Gravity.class) @With(Acceleration.class) Stream<Entity> query,
-            @Resource Time time) {
-        System.out.println(time);
+    public static void updateDeltaTime(@Resource Time time) {
+        long current = System.nanoTime();
+        time.deltaTime = ((current - time.lastTime) / 1000000.);
+        time.lastTime = current;
+        System.out.println(time.deltaTime);
+    }
 
+    @ECSSystem
+    public static void applyGravity(@With(Acceleration.class) @With(Gravity.class) Stream<Entity> query) {
         query.forEach(e -> {
-            System.out.println(e);
+            Acceleration acc = e.getComponent(Acceleration.class);
+            Gravity grav = e.getComponent(Gravity.class);
+            acc.dy = grav.gravity;
         });
     }
 
     @ECSSystem
-    public static void system2(
-            @With(Gravity.class) Stream<Entity> query) {
+    public static void applyAcceleration(
+        @With(Position.class)
+        @With(Velocity.class)
+        @With(Acceleration.class)
+        @With(Mass.class) Stream<Entity> query,
+        @Resource Time time) {
 
+        query.forEach(e -> {
+            Position pos = e.getComponent(Position.class);
+            Velocity vel = e.getComponent(Velocity.class);
+            Acceleration acc = e.getComponent(Acceleration.class);
+            Mass mass = e.getComponent(Mass.class);
+
+            vel.dx = (acc.dx / mass.mass) * time.deltaTime;
+            vel.dy = (acc.dy / mass.mass) * time.deltaTime;
+
+            pos.x += vel.dx * time.deltaTime;
+            pos.y += vel.dy * time.deltaTime;
+
+            acc.dx = 0;
+            acc.dy = 0;
+        });
     }
-
-    // @ECSSystem
-    // public static void updateDeltaTime(@Resource Time time) {
-    //     long current = System.nanoTime();
-    //     time.deltaTime = ((current - time.lastTime) / 1000000.);
-    //     time.lastTime = current;
-    // }
-
-    // @ComponentSystem
-    // public static void applyGravity(Gravity grav, Acceleration acc) {
-    // acc.dy = grav.gravity;
-    // }
-
-    // @ComponentSystem
-    // public static void applyAcceleration(Position pos, Velocity vel, Acceleration
-    // acc, Mass mass, @Resource Time time) {
-    // vel.dx = (acc.dx / mass.mass) * time.deltaTime;
-    // vel.dy = (acc.dy / mass.mass) * time.deltaTime;
-
-    // pos.x += vel.dx * time.deltaTime;
-    // pos.y += vel.dy * time.deltaTime;
-
-    // acc.dx = 0;
-    // acc.dy = 0;
-    // }
 }
 
 class Time extends IComponent {
