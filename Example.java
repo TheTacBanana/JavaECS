@@ -1,16 +1,15 @@
-package src;
-
 import java.util.Random;
 import java.util.stream.Stream;
 
-import src.ecs.*;
-import src.world.World;
-import src.world.annotations.*;
+import src.main.java.com.banana.ecslib.ecs.Entity;
+import src.main.java.com.banana.ecslib.ecs.IComponent;
+import src.main.java.com.banana.ecslib.world.World;
+import src.main.java.com.banana.ecslib.world.annotations.*;
 
-public class Main {
+public class Example {
     public static void main(String[] args) throws Exception {
         World world = new World();
-        world.addSystemsFrom(Main.class);
+        world.addSystemsFrom(Example.class);
 
         world.addResource(new Time());
         for (int i = 0; i < 3; i++) {

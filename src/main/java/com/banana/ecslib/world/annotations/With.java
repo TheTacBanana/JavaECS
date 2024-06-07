@@ -1,4 +1,4 @@
-package src.world.annotations;
+package src.main.java.com.banana.ecslib.world.annotations;
 
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;

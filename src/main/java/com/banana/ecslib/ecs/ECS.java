@@ -1,6 +1,5 @@
-package src.ecs;
+package src.main.java.com.banana.ecslib.ecs;
 
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
 public class ECS {

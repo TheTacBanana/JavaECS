@@ -1,11 +1,11 @@
-package src.world;
+package src.main.java.com.banana.ecslib.world;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
-import src.ecs.*;
-import src.world.annotations.ECSSystem;
+import src.main.java.com.banana.ecslib.ecs.*;
+import src.main.java.com.banana.ecslib.world.annotations.ECSSystem;
 
 public class World {
     public final static int MAX_ENTITY_ID = 1000;

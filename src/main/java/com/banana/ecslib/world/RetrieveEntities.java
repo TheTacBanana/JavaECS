@@ -1,4 +1,4 @@
-package src.world;
+package src.main.java.com.banana.ecslib.world;
 
 public class RetrieveEntities implements SystemParam {
     Class<?>[] with = new Class[0];

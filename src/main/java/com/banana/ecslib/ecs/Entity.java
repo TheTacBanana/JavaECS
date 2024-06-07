@@ -1,4 +1,4 @@
-package src.ecs;
+package src.main.java.com.banana.ecslib.ecs;
 
 import java.util.BitSet;
 
