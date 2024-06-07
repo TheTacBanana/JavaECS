@@ -41,3 +41,7 @@ public static void applyGravity(@With(Acceleration.class) @With(Gravity.class) S
     });
 }
 ```
+
+Licenced under MIT, feel free to use
+
+I wouldn't necessarily recommend use of this software
