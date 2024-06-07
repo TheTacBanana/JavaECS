@@ -1,8 +1,10 @@
 package src.ecs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 public class ECSInternal {
     final int MAX_ENTITY_ID;
@@ -160,7 +162,7 @@ public class ECSInternal {
         }
     }
 
-    private BitSet componentsToBitSet(Class<?>... comps){
+    private BitSet componentsToBitSet(Class<?>... comps) {
         int[] compIds = this.registerComponents(comps);
         BitSet bs = new BitSet(this.MAX_COMPONENT_POOLS);
         for (int i : compIds) {
@@ -169,27 +171,21 @@ public class ECSInternal {
         return bs;
     }
 
-    public ArrayList<Entity> query(Class<?>[] withIn, Class<?>[] withoutIn) {
+    public Stream<Entity> query(Class<?>[] withIn, Class<?>[] withoutIn) {
         BitSet with = this.componentsToBitSet(withIn);
         BitSet without = this.componentsToBitSet(withoutIn);
 
-        ArrayList<Entity> entities = new ArrayList<>();
-
-        for (int i = 0; i < this.entityArray.length; i++) {
-            Entity entity = this.getEntity(i);
-            if (entity == null) {
-                continue;
+        return Arrays.stream(this.entityArray).filter(e -> {
+            if (e == null) {
+                return false;
             }
 
-            BitSet withRes = (BitSet) this.getEntityBitSet(i).clone();
-            BitSet withoutRes = (BitSet) this.getEntityBitSet(i).clone();
+            BitSet withRes = (BitSet) e.getBitSet().clone();
+            BitSet withoutRes = (BitSet) withRes.clone();
             withRes.and(with);
             withoutRes.and(without);
 
-            if (withRes.equals(with) && withoutRes.isEmpty()) {
-                entities.add(entity);
-            }
-        }
-        return entities;
+            return (withRes.equals(with) && withoutRes.isEmpty());
+        });
     }
 }

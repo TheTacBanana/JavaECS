@@ -5,7 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import src.ecs.*;
-import src.world.annotations.ComponentSystem;
+import src.world.annotations.ECSSystem;
 
 public class World {
     public final static int MAX_ENTITY_ID = 100000;
@@ -34,10 +34,10 @@ public class World {
         return this.ecs;
     }
 
-    public void addSystemsFrom(Class<?> c){
+    public void addSystemsFrom(Class<?> c) throws InvalidSystemException{
         Method[] methods = c.getDeclaredMethods();
         for (int i = 0; i < methods.length; i++) {
-            if (methods[i].isAnnotationPresent(ComponentSystem.class)){
+            if (methods[i].isAnnotationPresent(ECSSystem.class)){
                 int modifiers = methods[i].getModifiers();
                 if (!Modifier.isStatic(modifiers)){
                     continue;

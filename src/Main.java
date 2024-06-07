@@ -1,16 +1,13 @@
 package src;
 
 import java.util.Random;
+import java.util.stream.Stream;
 
 import src.ecs.*;
 import src.world.World;
-import src.world.annotations.ComponentSystem;
+import src.world.annotations.ECSSystem;
 import src.world.annotations.Resource;
-
-/*
-Performance for 100000:
-V1 No Threading 0.06 Delta Time
-*/
+import src.world.annotations.With;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -20,7 +17,7 @@ public class Main {
 
         world.addSystemsFrom(Main.class);
 
-        for (int i = 0; i < World.MAX_ENTITY_ID; i++) {
+        for (int i = 0; i < 4; i++) {
             world.ecs().createEntity(
                     Position.random(),
                     new Velocity(),
@@ -29,36 +26,56 @@ public class Main {
                     new Gravity());
         }
 
-        while (true) {
-            Main.updateDeltaTime(world.getResource(Time.class));
-            world.runSystems();
-            System.out.println(1. / ((Time)world.getResource(Time.class)).deltaTime);
-        }
+
+        System.out.println(world.getResource(Time.class));
+        world.runSystems();
+
+        // while (true) {
+            // System.out.println(1. / ((Time) world.getResource(Time.class)).deltaTime);
+        // }
     }
+
+    @ECSSystem
+    public static void system(
+            @With(Gravity.class) @With(Acceleration.class) Stream<Entity> query,
+            @Resource Time time) {
+        System.out.println(time);
+
+        query.forEach(e -> {
+            System.out.println(e);
+        });
+    }
+
+    @ECSSystem
+    public static void system2(
+            @With(Gravity.class) Stream<Entity> query) {
+
+    }
+
+    // @ECSSystem
+    // public static void updateDeltaTime(@Resource Time time) {
+    //     long current = System.nanoTime();
+    //     time.deltaTime = ((current - time.lastTime) / 1000000.);
+    //     time.lastTime = current;
+    // }
 
     // @ComponentSystem
-    public static void updateDeltaTime(@Resource Time time) {
-        long current = System.nanoTime();
-        time.deltaTime = ((current - time.lastTime) / 1000000.);
-        time.lastTime = current;
-    }
+    // public static void applyGravity(Gravity grav, Acceleration acc) {
+    // acc.dy = grav.gravity;
+    // }
 
-    @ComponentSystem
-    public static void applyGravity(Gravity grav, Acceleration acc) {
-        acc.dy = grav.gravity;
-    }
+    // @ComponentSystem
+    // public static void applyAcceleration(Position pos, Velocity vel, Acceleration
+    // acc, Mass mass, @Resource Time time) {
+    // vel.dx = (acc.dx / mass.mass) * time.deltaTime;
+    // vel.dy = (acc.dy / mass.mass) * time.deltaTime;
 
-    @ComponentSystem
-    public static void applyAcceleration(Position pos, Velocity vel, Acceleration acc, Mass mass, @Resource Time time) {
-        vel.dx = (acc.dx / mass.mass) * time.deltaTime;
-        vel.dy = (acc.dy / mass.mass) * time.deltaTime;
+    // pos.x += vel.dx * time.deltaTime;
+    // pos.y += vel.dy * time.deltaTime;
 
-        pos.x += vel.dx * time.deltaTime;
-        pos.y += vel.dy * time.deltaTime;
-
-        acc.dx = 0;
-        acc.dy = 0;
-    }
+    // acc.dx = 0;
+    // acc.dy = 0;
+    // }
 }
 
 class Time extends IComponent {

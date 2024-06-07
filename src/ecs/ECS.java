@@ -1,6 +1,7 @@
 package src.ecs;
 
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class ECS {
     private ECSInternal internal;
@@ -29,7 +30,7 @@ public class ECS {
         return internal.entityExists(0);
     }
 
-    public ArrayList<Entity> query(Class<?>[] with, Class<?>[] without){
+    public Stream<Entity> query(Class<?>[] with, Class<?>[] without){
         return this.internal.query(with, without);
     }
 }

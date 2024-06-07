@@ -1,5 +1,7 @@
 package src.ecs;
 
+import java.util.BitSet;
+
 public class Entity {
     private int id;
     private ECSInternal ecs;
@@ -11,6 +13,10 @@ public class Entity {
 
     public EntityId getId(){
         return new EntityId(id);
+    }
+
+    public BitSet getBitSet() {
+        return ecs.getEntityBitSet(id);
     }
 
     public <T> T getComponent(Class<T> c){
@@ -33,4 +39,3 @@ public class Entity {
         return ecs.hasComponent(this.id, compClass);
     }
 }
-

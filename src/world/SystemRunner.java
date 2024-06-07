@@ -1,103 +1,94 @@
 package src.world;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
 
-import src.ecs.Entity;
-import src.world.annotations.ComponentSystem;
 import src.world.annotations.Resource;
 import src.world.annotations.With;
-import src.world.annotations.Without;
+import src.world.annotations.WithMany;
 
 public class SystemRunner {
     private Method method;
-    private ComponentSystem anno;
+    private Object[] methodInputs;
+    private SystemParam[] params;
 
-    private Class<?>[] with;
-    private Class<?>[] without;
-
-    private PopulateObjTo[] populate;
-    private PopulateObjTo[] resources;
-
-    private Object[] inputs;
-
-    public SystemRunner(Method method) {
+    public SystemRunner(Method method) throws InvalidSystemException{
         this.method = method;
-        this.anno = method.getAnnotation(ComponentSystem.class);
-        this.inputs = new Object[method.getParameterCount()];
+        this.methodInputs = new Object[method.getParameterCount()];
+        this.params = new SystemParam[method.getParameterCount()];
 
         method.setAccessible(true);
         Class<?>[] params = this.method.getParameterTypes();
         Annotation[][] annos = this.method.getParameterAnnotations();
 
-        ArrayList<Class<?>> withList = new ArrayList<>();
-        ArrayList<Class<?>> withoutList = new ArrayList<>();
-        ArrayList<PopulateObjTo> pop = new ArrayList<>();
-        ArrayList<PopulateObjTo> resourcesList = new ArrayList<>();
         for (int i = 0; i < params.length; i++) {
-            Class<?> c = params[i];
-            if (annos[i].length > 0 && annos[i][0].annotationType() == With.class) {
-                System.out.println("With Annotation");
-                withList.add(c);
-            } else if (annos[i].length > 0 && annos[i][0].annotationType() == Without.class) {
-                System.out.println("Without Annotation");
-                withoutList.add(c);
-            } else if (annos[i].length > 0 && annos[i][0].annotationType() == Resource.class) {
-                System.out.println("Resource Annotation");
-                resourcesList.add(new PopulateObjTo(c, i));
-            } else {
-                System.out.println("No Annotation");
-                withList.add(c);
-                pop.add(new PopulateObjTo(c, i));
+            this.params[i] = this.buildSystemParam(params[i], annos[i]);
+        }
+
+        for (SystemParam p : this.params) {
+            System.out.println(p);
+        }
+    }
+
+    public SystemParam buildSystemParam(Class<?> paramType, Annotation[] annotations) throws InvalidSystemException {
+        if (annotations.length == 0) {
+            return null;
+        }
+
+        RetrieveEntities query = null;
+        RetrieveResource resource = null;
+
+        for (Annotation annotation : annotations) {
+            Class<?> c = annotation.annotationType();
+
+            if (c == With.class) {
+                if (query == null) {
+                    query = new RetrieveEntities();
+                }
+                query.addWith(((With) annotation).value());
+            } else if (c == WithMany.class){
+                if (query == null) {
+                    query = new RetrieveEntities();
+                }
+                With[] withMany = ((WithMany) annotation).value();
+
+                for (With with : withMany) {
+                    query.addWith(with.value());
+                }
+            } else if (c == Resource.class) {
+                if (resource == null) {
+                    resource = new RetrieveResource(paramType);
+                }
             }
         }
 
-        this.with = new Class<?>[withList.size()];
-        for (int i = 0; i < this.with.length; i++) {
-            this.with[i] = withList.get(i);
+        if (query != null && resource == null) {
+            return query;
+        }
+        if (resource != null && query == null) {
+            return resource;
+        }
+        if (query != null && resource != null) {
+            throw new InvalidSystemException();
         }
 
-        this.without = new Class<?>[withoutList.size()];
-        for (int i = 0; i < this.without.length; i++) {
-            this.without[i] = withoutList.get(i);
-        }
-
-        this.populate = new PopulateObjTo[pop.size()];
-        for (int i = 0; i < this.populate.length; i++) {
-            this.populate[i] = pop.get(i);
-        }
-
-        this.resources = new PopulateObjTo[resourcesList.size()];
-        for (int i = 0; i < this.resources.length; i++) {
-            this.resources[i] = resourcesList.get(i);
-        }
+        return null;
     }
 
     public void run(World world) {
-        ArrayList<Entity> entities = world.ecs().query(this.with, this.without);
-        for (Entity entity : entities) {
-            for (PopulateObjTo pop : this.populate) {
-                Class<?> c = pop.c();
-                this.inputs[pop.to()] = entity.getComponent(c);
+        for (int i = 0; i < this.params.length; i++) {
+            SystemParam p = this.params[i];
+            if (p != null) {
+                this.methodInputs[i] = p.getFromWorld(world);
             }
-
-            for (PopulateObjTo res : this.resources) {
-                Class<?> c = res.c();
-                this.inputs[res.to()] = world.getResource(c);
-            }
-
-            try {
-                this.method.invoke(null, this.inputs);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+            System.out.println(this.methodInputs[i]);
         }
-    }
 
-    public record PopulateObjTo(Class<?> c, int to) {
+        try {
+            this.method.invoke(null, this.methodInputs);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 }
