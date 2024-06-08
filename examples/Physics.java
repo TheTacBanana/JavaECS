@@ -6,10 +6,10 @@ import com.banana.ecslib.ecs.IComponent;
 import com.banana.ecslib.world.World;
 import com.banana.ecslib.world.annotations.*;
 
-public class Example {
+public class Physics {
     public static void main(String[] args) throws Exception {
         World world = new World();
-        world.addSystemsFrom(Example.class);
+        world.addSystemsFrom(Physics.class);
 
         world.addResource(new Time());
         for (int i = 0; i < 3; i++) {

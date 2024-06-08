@@ -3,6 +3,7 @@ package com.banana.ecslib.world;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
 import com.banana.ecslib.world.annotations.*;
 
@@ -79,14 +80,14 @@ public class SystemRunner {
             }
         }
 
-        if (query != null && resource == null) {
+        if (query != null && resource == null && paramType == Stream.class) {
             return query;
         }
         if (resource != null && query == null) {
             return resource;
         }
         if (query != null && resource != null) {
-            throw new InvalidSystemException();
+            throw new InvalidSystemException(this.method);
         }
 
         return null;
